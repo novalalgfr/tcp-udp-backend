@@ -38,6 +38,11 @@ def list_files():
     files = os.listdir(UPLOAD_DIR) if os.path.exists(UPLOAD_DIR) else []
     return jsonify({"files": files}), 200
 
+@file_bp.route("/download/<filename>", methods=["GET"])
+def download_file(filename):
+    filename = os.path.basename(filename)
+    return send_from_directory(UPLOAD_DIR, filename, as_attachment=True)
+
 @file_bp.route("/videos", methods=["GET"])
 def list_videos():
     videos = os.listdir(VIDEO_DIR) if os.path.exists(VIDEO_DIR) else []
