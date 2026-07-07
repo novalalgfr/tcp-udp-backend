@@ -31,4 +31,4 @@ VIDEO_DIR = os.path.join(os.path.dirname(__file__), "storage", "videos")
 FLASK_HOST = "0.0.0.0"
 FLASK_PORT = 5000
 
-FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:3000")
+FRONTEND_URL = os.getenv("FRONTEND_URL", "https://tcp-udp-frontend.vercel.app")
