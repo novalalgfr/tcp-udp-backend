@@ -51,7 +51,7 @@ def list_videos():
 @file_bp.route("/stream/<filename>", methods=["GET"])
 def stream_video(filename):
     udp_socket = sock_module.socket(sock_module.AF_INET, sock_module.SOCK_DGRAM)
-    udp_socket.settimeout(5)
+    udp_socket.settimeout(30)
 
     server_addr = (UDP_HOST if UDP_HOST != "0.0.0.0" else "localhost", UDP_PORT)
     udp_socket.sendto(filename.encode(), server_addr)
