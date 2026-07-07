@@ -13,7 +13,7 @@ from sockets.udp_server import start_udp_server
 app = Flask(__name__)
 app.config["SECRET_KEY"] = SECRET_KEY
 
-CORS(app, origins=["http://localhost:3000"])
+CORS(app)
 
 app.register_blueprint(auth_bp)
 app.register_blueprint(file_bp)
