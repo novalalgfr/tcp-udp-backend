@@ -25,4 +25,4 @@ if __name__ == "__main__":
     threading.Thread(target=start_udp_server, daemon=True).start()
 
     print(f"Flask jalan di http://localhost:{FLASK_PORT}")
-    app.run(host=FLASK_HOST, port=FLASK_PORT, debug=True)
+    app.run(host=FLASK_HOST, port=FLASK_PORT, debug=False)
