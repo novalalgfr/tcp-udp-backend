@@ -8,7 +8,6 @@ from config import TCP_HOST, TCP_PORT, UPLOAD_DIR, UDP_HOST, UDP_PORT, VIDEO_DIR
 
 file_bp = Blueprint("file", __name__, url_prefix="/api/file")
 
-
 @file_bp.route("/upload", methods=["POST"])
 def upload():
     if "file" not in request.files:
