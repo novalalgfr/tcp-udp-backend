@@ -1,6 +1,5 @@
 # backend/app.py
 
-import os
 import threading
 from flask import Flask
 from flask_cors import CORS
@@ -14,7 +13,7 @@ from sockets.udp_server import start_udp_server
 app = Flask(__name__)
 app.config["SECRET_KEY"] = SECRET_KEY
 
-CORS(app, resources={r"/api/*": {"origins": os.getenv("FRONTEND_URL")}})
+CORS(app, resources={r"/api/*": {"origins": "*"}})
 
 app.register_blueprint(auth_bp)
 app.register_blueprint(file_bp)
