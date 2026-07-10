@@ -65,7 +65,6 @@ def send_video(server_socket, filename, client_addr):
         print(f"Selesai kirim '{filename}' ke {client_addr}, total {seq} chunk")
         
     except ConnectionResetError:
-        # Menangkap error saat user me-refresh halaman (socket Flask tertutup)
         print(f"Koneksi terputus ke {client_addr} (Browser di-refresh). Stream dihentikan.")
     except Exception as e:
         print(f"Error saat kirim video ke {client_addr}: {e}")
