@@ -50,9 +50,84 @@ def list_videos():
     videos = os.listdir(VIDEO_DIR) if os.path.exists(VIDEO_DIR) else []
     return jsonify({"videos": videos}), 200
 
-
 @file_bp.route("/stream/<filename>", methods=["GET"])
 def stream_video(filename):
+    filename = os.path.basename(filename)
+
+    udp_socket = sock_module.socket(sock_module.AF_INET, sock_module.SOCK_DGRAM)
+    udp_socket.settimeout(5.0)
+
+    server_addr = ("localhost", UDP_PORT)
+    udp_socket.sendto(filename.encode(), server_addr)
+
+    try:
+        data, _ = udp_socket.recvfrom(1024)
+    except sock_module.timeout:
+        return jsonify({"error": "Timeout dari UDP Server"}), 504
+
+    if data.startswith(b"ERROR"):
+        return jsonify({"error": "File tidak ditemukan di server UDP"}), 404
+
+    filesize = None
+    if data.startswith(b"SIZE:"):
+        filesize = data.decode().split(":")[1].strip()
+
+    def generate(sock):
+        chunks = {}
+        expected_seq = 0
+        MAX_BUFFER_SIZE = 100
+
+        try:
+            while True:
+                packet, _ = sock.recvfrom(4096 + 4)
+                if packet == b"END":
+                    for seq in sorted(chunks.keys()):
+                        yield chunks[seq]
+                    break
+
+                seq = int.from_bytes(packet[:4], byteorder="big")
+                chunk_data = packet[4:]
+
+                if seq == expected_seq:
+                    yield chunk_data
+                    expected_seq += 1
+                    
+                    while expected_seq in chunks:
+                        yield chunks.pop(expected_seq)
+                        expected_seq += 1
+                elif seq > expected_seq:
+                    chunks[seq] = chunk_data
+                    
+                    if len(chunks) > MAX_BUFFER_SIZE:
+                        expected_seq = min(chunks.keys())
+                        yield chunks.pop(expected_seq)
+                        expected_seq += 1
+                        
+                        while expected_seq in chunks:
+                            yield chunks.pop(expected_seq)
+                            expected_seq += 1
+        except sock_module.timeout:
+            pass
+        finally:
+            sock.close()
+
+    mime, _ = mimetypes.guess_type(filename)
+    mime = mime or "video/mp4"
+
+    headers = {
+        "Content-Disposition": f"inline; filename={filename}",
+        "Accept-Ranges": "none",
+        "Cache-Control": "no-store, no-cache, must-revalidate, max-age=0"
+    }
+    
+    if filesize:
+        headers["Content-Length"] = str(filesize)
+
+    return Response(
+        stream_with_context(generate(udp_socket)),
+        mimetype=mime,
+        headers=headers
+    )
     filename = os.path.basename(filename)
 
     def generate():
